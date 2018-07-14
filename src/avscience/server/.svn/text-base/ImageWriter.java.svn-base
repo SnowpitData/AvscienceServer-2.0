@@ -1,0 +1,40 @@
+package avscience.server;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import avscience.server.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import avscience.wba.*;
+import avscience.ppc.PitObs;
+import avscience.pc.PitFrame;
+import java.awt.image.*;
+import com.sun.image.codec.jpeg.*;
+
+public class ImageWriter 
+{
+    public ImageWriter(PitObs pit, HttpServletResponse response, String serial) 
+    {
+    	try
+    	{
+	    	System.out.println("Starting pit frame.");
+			PitFrame frame = new PitFrame(pit, null, true);
+			System.out.println("Getting image from pit frame.");
+			BufferedImage image = frame.getPitImage();
+			File f = new File("/Users/kahrlconsulting/Sites/kahrlconsulting/pits/"+serial+".jpg");
+			if (f.exists()) f.delete();
+			FileOutputStream fout = new FileOutputStream(f);
+			JPEGImageEncoder en = JPEGCodec.createJPEGEncoder(fout);
+			System.out.println("Encoding image.");
+			en.encode(image);
+			System.out.println("Writing image.");
+	        fout.flush();
+	        fout.close();
+	        String srl = "http://kahrlconsulting.com/pits/"+serial+".jpg";
+	        response.sendRedirect(srl);
+	        frame.dispose();
+        }
+        catch(Exception e){System.out.println(e.toString());}
+    }
+}
